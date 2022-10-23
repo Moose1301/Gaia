@@ -126,7 +126,7 @@ public class Logger {
     public static enum DebugType {
         SUCCESS(ConsoleColors.GREEN_BRIGHT + "[SUCCESS]"),
         ERROR(ANSI_RED + "[ERROR]"),
-        INFO(ANSI_RESET);
+        INFO(ANSI_RESET + "[INFO]");
 
         private String message;
 

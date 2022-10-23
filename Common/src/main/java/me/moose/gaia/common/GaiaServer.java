@@ -20,6 +20,7 @@ public class GaiaServer {
 
         //Disable PacketRegistry Debug
         getLogger().disableDebugBrand("PacketRegistry");
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> GaiaServer.getInstance().shutdown()));
     }
     public static IGaiaServer getInstance() {
         return gaiaServer;

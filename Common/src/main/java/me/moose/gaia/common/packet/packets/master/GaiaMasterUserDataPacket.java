@@ -34,18 +34,23 @@ public abstract class GaiaMasterUserDataPacket extends GaiaMasterPacket {
     public void write(JsonObject object) {
         object.addProperty("uuid", uuid.toString());
     }
+    @NoArgsConstructor @Getter
     public static class Loaded extends GaiaMasterUserDataPacket {
-        public Loaded(UUID uuid) {
+        private String username;
+        public Loaded(UUID uuid, String username) {
             super(uuid);
+            this.username = username;
         }
         @Override
         public void read(JsonObject object) {
             super.read(object);
+            username = object.get("username").getAsString();
         }
 
         @Override
         public void write(JsonObject object) {
             super.write(object);
+            object.addProperty("username", username);
         }
 
         @Override
@@ -53,6 +58,7 @@ public abstract class GaiaMasterUserDataPacket extends GaiaMasterPacket {
             handler.handle(this);
         }
     }
+    @NoArgsConstructor @Getter
     public static class Data extends GaiaMasterUserDataPacket {
         private Rank rank;
         public Data(UUID uuid, Rank rank) {
@@ -151,6 +157,7 @@ public abstract class GaiaMasterUserDataPacket extends GaiaMasterPacket {
             handler.handle(this);
         }
     }
+    @NoArgsConstructor @Getter
     public static class Cosmetics extends GaiaMasterUserDataPacket {
         private List<CommonProfileCosmetic> cosmetics;
         public Cosmetics(UUID uuid, List<CommonProfileCosmetic> cosmetics) {

@@ -9,6 +9,7 @@ import me.moose.gaia.common.redis.RedisHandler;
 import me.moose.gaia.common.utils.Logger;
 import me.moose.gaia.slave.cosmetic.CosmeticHandler;
 import me.moose.gaia.slave.packet.GaiaSlavePacketHandler;
+import me.moose.gaia.slave.profile.ProfileHandler;
 
 /**
  * @author Moose1301
@@ -24,6 +25,7 @@ public class GaiaSlave implements IGaiaServer {
     private GaiaSlavePacketHandler packetHandler;
     private RedisHandler redisHandler;
     private CosmeticHandler cosmeticHandler;
+    private ProfileHandler profileHandler;
     private GaiaConfig gaiaConfig;
     public GaiaSlave() {
         logger = new Logger("Gaia", true);
@@ -33,6 +35,7 @@ public class GaiaSlave implements IGaiaServer {
         gaiaConfig = new GaiaConfig();
 
         cosmeticHandler = new CosmeticHandler();
+        profileHandler = new ProfileHandler();
         packetHandler = new GaiaSlavePacketHandler();
         redisHandler = new RedisHandler(
                 "127.0.0.1",
@@ -56,4 +59,8 @@ public class GaiaSlave implements IGaiaServer {
     }
 
 
+    @Override
+    public void shutdown() {
+        redisHandler.sendPacket(new GaiaSlaveStatusPacket.Shutdown());
+    }
 }

@@ -13,4 +13,5 @@ public interface IGaiaServer {
     Logger getLogger();
     RedisHandler getRedisHandler();
     ICosmeticHandler getCosmeticHandler();
+    void shutdown();
 }

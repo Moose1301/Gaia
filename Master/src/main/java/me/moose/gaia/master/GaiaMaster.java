@@ -10,6 +10,7 @@ import lombok.Getter;
 import me.moose.gaia.common.GaiaServer;
 import me.moose.gaia.common.IGaiaServer;
 import me.moose.gaia.common.packet.packets.master.GaiaMasterStatusPacket;
+import me.moose.gaia.common.packet.packets.slave.GaiaSlaveStatusPacket;
 import me.moose.gaia.common.redis.RedisHandler;
 import me.moose.gaia.common.utils.Logger;
 import me.moose.gaia.master.cosmetic.CosmeticHandler;
@@ -69,15 +70,19 @@ public class GaiaMaster implements IGaiaServer {
         new Thread(new Runnable() {
             @Override
             public synchronized void run() {
-                for(;;)
+                for(;;) {
                     try {
                         wait();
                     } catch (InterruptedException e) {
                     }
+                }
             }
         }).run();
-    }
 
+    }
+    public void shutdown() {
+        redisHandler.sendPacket(new GaiaMasterStatusPacket.Shutdown(), "slaves");
+    }
     public void connectToMongo() {
 
         client = new MongoClient(new ServerAddress(config.getMongoHost(), config.getMongoPort()));

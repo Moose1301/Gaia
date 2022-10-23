@@ -47,9 +47,9 @@ public class GaiaPubSub extends JedisPubSub {
             GaiaServer.getInstance().getLogger().debug("RedisHandler", "Handling Packet: " + gaiaPacket.getClass().getSimpleName());
             gaiaPacket.handle(redisHandler.getPacketHandler());
             GaiaServer.getInstance().getLogger().debug("RedisHandler", "Handled Packet: " + gaiaPacket.getClass().getSimpleName(), Logger.DebugType.SUCCESS);
-        } catch (IllegalAccessException | InstantiationException e) {
+        } catch (Exception e) {
             //TODO LOGGER
-            GaiaServer.getLogger().error("RedisHandler", "Error Creating Packet With ID: " + id + " (From: " + sender + ")");
+            GaiaServer.getLogger().error("RedisHandler", "Error While Handling Packet With ID: " + id + " (From: " + sender + ")");
             e.printStackTrace();
         }
 

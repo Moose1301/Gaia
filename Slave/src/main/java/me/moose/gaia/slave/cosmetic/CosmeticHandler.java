@@ -1,5 +1,6 @@
 package me.moose.gaia.slave.cosmetic;
 
+import me.moose.gaia.common.cosmetic.ICosmeticHandler;
 import me.moose.gaia.common.cosmetic.data.CommonCosmetic;
 
 import java.util.HashMap;
@@ -10,7 +11,7 @@ import java.util.Map;
  * @author Moose1301
  * @date 10/22/2022
  */
-public class CosmeticHandler {
+public class CosmeticHandler implements ICosmeticHandler {
     private Map<String, CommonCosmetic> cosmetics = new HashMap<>();
 
     public Map<String, CommonCosmetic> getCosmetics() {
@@ -26,5 +27,10 @@ public class CosmeticHandler {
 
     public CommonCosmetic getCosmetic(String name) {
         return cosmetics.get(name);
+    }
+
+    @Override
+    public CommonCosmetic getCommonCosmetic(String name) {
+        return getCosmetic(name);
     }
 }

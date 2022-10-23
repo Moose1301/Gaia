@@ -16,17 +16,31 @@ import java.util.UUID;
 public class GaiaSlaveRequestUserDataPacket extends GaiaSlavePacket {
     private UUID uuid;
     private DataType type;
+    private String username;
+    public GaiaSlaveRequestUserDataPacket(UUID uuid, DataType type) {
+        this.uuid = uuid;
+        this.type = type;
+        if(type == DataType.LOAD) {
+            throw new RuntimeException("Cannot Create new Instance of GaiaSlaveRequestUserDataPacket without a username while Data Type is LOAD");
+        }
+    }
 
     @Override
     public void read(JsonObject object) {
       uuid = UUID.fromString(object.get("uuid").getAsString());
       type = DataType.valueOf(object.get("type").getAsString());
+      if(object.has("username")) {
+          this.username = object.get("username").getAsString();
+      }
     }
 
     @Override
     public void write(JsonObject object) {
         object.addProperty("uuid", uuid.toString());
         object.addProperty("type", type.name());
+        if(this.username != null) {
+            object.addProperty("username", username);
+        }
     }
 
     @Override
@@ -36,8 +50,9 @@ public class GaiaSlaveRequestUserDataPacket extends GaiaSlavePacket {
 
 
     public enum DataType {
+        LOAD,
         DATA,
-        COSMETIC,
+        COSMETICS,
         FRIENDS
     }
 }

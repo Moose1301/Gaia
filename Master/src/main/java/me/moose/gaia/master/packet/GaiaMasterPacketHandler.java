@@ -38,16 +38,21 @@ public class GaiaMasterPacketHandler implements IGaiaMasterPacketHandler {
     @Override
     public void handle(GaiaSlaveUserJoinPacket packet) {
         GaiaMaster.getInstance().getProfileHandler().getProfileOrLoad(packet.getUuid(), packet.getUsername());
-        GaiaServer.getRedisHandler().sendPacket(new GaiaMasterUserDataPacket.Loaded(packet.getUuid()), packet.getSendingID());
+        GaiaServer.getRedisHandler().sendPacket(new GaiaMasterUserDataPacket.Loaded(packet.getUuid(), packet.getUsername()), packet.getSendingID());
 
     }
 
     @Override
     public void handle(GaiaSlaveRequestUserDataPacket packet) {
+        if(packet.getType() == GaiaSlaveRequestUserDataPacket.DataType.LOAD) {
+            GaiaMaster.getInstance().getProfileHandler().getProfileOrLoad(packet.getUuid(), packet.getUsername());
+            GaiaServer.getRedisHandler().sendPacket(new GaiaMasterUserDataPacket.Loaded(packet.getUuid(), packet.getUsername()), packet.getSendingID());
+            return;
+        }
         Profile profile = GaiaMaster.getInstance().getProfileHandler().getProfile(packet.getUuid());
         if(profile == null) {
-            GaiaServer.getLogger().error("PacketHandler", packet.getSendingID() + " Requested Profile with UUID " +
-                    packet.getUuid().toString() + " but it wasn't loaded");
+            GaiaServer.getLogger().error("PacketHandler", packet.getSendingID() + " Requested Profile with UUID \"" +
+                    packet.getUuid().toString() + "\" but it wasn't loaded");
             return;
         }
         GaiaMasterPacket sendingPacket = null;
@@ -55,7 +60,7 @@ public class GaiaMasterPacketHandler implements IGaiaMasterPacketHandler {
             case DATA:
                 sendingPacket = new GaiaMasterUserDataPacket.Data(profile.getUniqueId(), profile.getRank());
                 break;
-            case COSMETIC:
+            case COSMETICS:
                 sendingPacket = new GaiaMasterUserDataPacket.Cosmetics(profile.getUniqueId(), profile.getCommonCosmetics());
                 break;
             case FRIENDS:

@@ -46,6 +46,6 @@ public class CosmeticHandler implements ICosmeticHandler {
 
     @Override
     public CommonCosmetic getCommonCosmetic(String name) {
-        return cosmetics.get(name).toCommon();
+        return getCosmetic(name).toCommon();
     }
 }
