@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author GoXLR
@@ -28,6 +30,7 @@ public class Logger {
     public static final String ANSI_WHITE = "\u001B[37m";
 
     @Setter private boolean printDebug = false;
+    private List<String> disabledDebugBrands = new ArrayList<>();
 
     public Logger(String name) {
         this(name, false);
@@ -104,12 +107,21 @@ public class Logger {
         return debug(brand, debug, DebugType.INFO);
     }
     public Logger debug(String brand, String debug, DebugType type) {
+        if(disabledDebugBrands.contains(brand.toLowerCase())) {
+            return this;
+        }
         if (printDebug){
             outStream.println(ANSI_BLUE + "[DEBUG]" + ANSI_RESET + type.getMessage() + "[" + brand + " - " + loggerName + "] " + debug);
         }
         return this;
     }
 
+    public void disableDebugBrand(String brand) {
+        this.disabledDebugBrands.add(brand.toLowerCase());
+    }
+    public void enableDebugBrand(String brand) {
+        this.disabledDebugBrands.remove(brand.toLowerCase());
+    }
     @AllArgsConstructor @Getter
     public static enum DebugType {
         SUCCESS(ConsoleColors.GREEN_BRIGHT + "[SUCCESS]"),

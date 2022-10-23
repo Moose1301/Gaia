@@ -1,11 +1,13 @@
 package me.moose.gaia.slave;
 
 import lombok.Getter;
+import lombok.Setter;
 import me.moose.gaia.common.GaiaServer;
 import me.moose.gaia.common.IGaiaServer;
-import me.moose.gaia.common.packet.packets.slave.GaiaSlaveServerStartPacket;
+import me.moose.gaia.common.packet.packets.slave.GaiaSlaveStatusPacket;
 import me.moose.gaia.common.redis.RedisHandler;
 import me.moose.gaia.common.utils.Logger;
+import me.moose.gaia.slave.cosmetic.CosmeticHandler;
 import me.moose.gaia.slave.packet.GaiaSlavePacketHandler;
 
 /**
@@ -16,16 +18,21 @@ import me.moose.gaia.slave.packet.GaiaSlavePacketHandler;
 public class GaiaSlave implements IGaiaServer {
     @Getter
     private static GaiaSlave instance;
+    @Setter
+    private boolean connected;
     private Logger logger;
     private GaiaSlavePacketHandler packetHandler;
     private RedisHandler redisHandler;
-
+    private CosmeticHandler cosmeticHandler;
     private GaiaConfig gaiaConfig;
     public GaiaSlave() {
+        logger = new Logger("Gaia", true);
         GaiaServer.setInstance(this);
         instance = this;
+        connected = false;
         gaiaConfig = new GaiaConfig();
-        logger = new Logger("Gaia", true);
+
+        cosmeticHandler = new CosmeticHandler();
         packetHandler = new GaiaSlavePacketHandler();
         redisHandler = new RedisHandler(
                 "127.0.0.1",
@@ -33,7 +40,7 @@ public class GaiaSlave implements IGaiaServer {
                 gaiaConfig.getId(),
                 packetHandler
         );
-        redisHandler.sendPacket(new GaiaSlaveServerStartPacket(gaiaConfig.getId(), gaiaConfig.getRegion()));
+        redisHandler.sendPacket(new GaiaSlaveStatusPacket.Startup(gaiaConfig.getId(), gaiaConfig.getRegion()));
 
         //Stay Open
         new Thread(new Runnable() {
@@ -47,4 +54,6 @@ public class GaiaSlave implements IGaiaServer {
             }
         }).run();
     }
+
+
 }

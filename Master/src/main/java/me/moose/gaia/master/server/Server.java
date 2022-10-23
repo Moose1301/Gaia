@@ -12,7 +12,15 @@ import java.util.UUID;
  */
 @Getter
 public class Server {
+    /**
+     * The ID Sent By the Server
+     * Do not use when sending Packets
+     */
     private String realId;
+    /**
+     * Generated ID by the Master Server
+     * Use when sending packets
+     */
     private String id;
     private String region;
     private Set<UUID> profiles = new HashSet<>();

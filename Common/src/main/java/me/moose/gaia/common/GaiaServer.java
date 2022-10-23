@@ -17,6 +17,9 @@ public class GaiaServer {
             throw new RuntimeException("Cannot Change Instance of GaiaServer");
         }
         gaiaServer = server;
+
+        //Disable PacketRegistry Debug
+        getLogger().disableDebugBrand("PacketRegistry");
     }
     public static IGaiaServer getInstance() {
         return gaiaServer;

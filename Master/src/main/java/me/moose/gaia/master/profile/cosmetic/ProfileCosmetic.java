@@ -1,7 +1,8 @@
 package me.moose.gaia.master.profile.cosmetic;
 
 import lombok.Getter;
-import me.moose.gaia.common.cosmetic.data.Cosmetic;
+import me.moose.gaia.common.profile.cosmetic.CommonProfileCosmetic;
+import me.moose.gaia.master.cosmetic.data.Cosmetic;
 import org.bson.Document;
 
 /**
@@ -12,17 +13,24 @@ import org.bson.Document;
 public class ProfileCosmetic {
     private Cosmetic cosmetic;
     private boolean active;
-
+    private CommonProfileCosmetic commonCosmetic;
     public ProfileCosmetic(Cosmetic cosmetic) {
         this.cosmetic = cosmetic;
         this.active = false;
-
+        this.commonCosmetic = new CommonProfileCosmetic(cosmetic.toCommon(), active);
     }
 
     public ProfileCosmetic(Document document) {
-        //TODO COSMEITC SHIT
+        //TODO COSMETIC SHIT
     }
 
+    public void setActive(boolean active) {
+        this.commonCosmetic = new CommonProfileCosmetic(cosmetic.toCommon(), active);
+        this.active = active;
+    }
+    public CommonProfileCosmetic toCommon() {
+        return commonCosmetic;
+    }
 
     public Document toDocument() {
         Document document = new Document();

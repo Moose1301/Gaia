@@ -6,10 +6,14 @@ import com.google.gson.JsonObject;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import me.moose.gaia.common.GaiaServer;
+import me.moose.gaia.common.cosmetic.data.CommonCosmetic;
 import me.moose.gaia.common.packet.handler.IGaiaSlavePacketHandler;
+import me.moose.gaia.common.profile.cosmetic.CommonProfileCosmetic;
 import me.moose.gaia.common.profile.friend.CommonFriend;
-import me.moose.gaia.common.profile.friend.FriendRequest;
+import me.moose.gaia.common.profile.friend.CommonFriendRequest;
 import me.moose.gaia.common.profile.friend.status.FriendStatus;
+import me.moose.gaia.common.profile.rank.Rank;
 
 import java.util.List;
 import java.util.UUID;
@@ -50,17 +54,21 @@ public abstract class GaiaMasterUserDataPacket extends GaiaMasterPacket {
         }
     }
     public static class Data extends GaiaMasterUserDataPacket {
-        public Data(UUID uuid) {
+        private Rank rank;
+        public Data(UUID uuid, Rank rank) {
             super(uuid);
+            this.rank = rank;
         }
         @Override
         public void read(JsonObject object) {
             super.read(object);
+            rank = Rank.valueOf(object.get("rank").getAsString());
         }
 
         @Override
         public void write(JsonObject object) {
             super.write(object);
+            object.addProperty("rank", rank.name());
         }
 
         @Override
@@ -68,18 +76,25 @@ public abstract class GaiaMasterUserDataPacket extends GaiaMasterPacket {
             handler.handle(this);
         }
     }
-    @AllArgsConstructor @NoArgsConstructor @Getter
+    @NoArgsConstructor @Getter
     public static class Friends extends GaiaMasterUserDataPacket {
-        public Friends(UUID uuid) {
-            super(uuid);
-        }
         private List<CommonFriend> friends;
-        private List<FriendRequest> requests;
+        private List<CommonFriendRequest> requests;
         private boolean requestsEnabled;
+        private FriendStatus status;
+        public Friends(UUID uuid, List<CommonFriend> friends, List<CommonFriendRequest> requests, boolean requestsEnabled, FriendStatus status ) {
+            super(uuid);
+            this.friends = friends;
+            this.requests = requests;
+            this.requestsEnabled = requestsEnabled;
+            this.status = status;
+        }
+
         @Override
         public void read(JsonObject object) {
             super.read(object);
             requestsEnabled = object.get("requestsEnabled").getAsBoolean();
+            status = FriendStatus.valueOf(object.get("status").getAsString());
             JsonArray friends = object.getAsJsonArray("friends");
             for (JsonElement element : friends) {
                 JsonObject friendObject = element.getAsJsonObject();
@@ -98,7 +113,7 @@ public abstract class GaiaMasterUserDataPacket extends GaiaMasterPacket {
                 UUID uuid = UUID.fromString(requestObject.get("uuid").getAsString());
                 String name = requestObject.get("name").getAsString();
                 boolean outgoing = requestObject.get("outgoing").getAsBoolean();
-                this.requests.add(new FriendRequest(uuid, name, outgoing));
+                this.requests.add(new CommonFriendRequest(uuid, name, outgoing));
             }
         }
 
@@ -106,6 +121,7 @@ public abstract class GaiaMasterUserDataPacket extends GaiaMasterPacket {
         public void write(JsonObject object) {
             super.write(object);
             object.addProperty("requestsEnabled", requestsEnabled);
+            object.addProperty("status", status.name());
             JsonArray friends = new JsonArray();
             for (CommonFriend friend : this.friends) {
                 JsonObject friendObject = new JsonObject();
@@ -120,7 +136,7 @@ public abstract class GaiaMasterUserDataPacket extends GaiaMasterPacket {
             }
             object.add("friends", friends);
             JsonArray requests = new JsonArray();
-            for (FriendRequest request : this.requests) {
+            for (CommonFriendRequest request : this.requests) {
                 JsonObject requestObject = new JsonObject();
                 requestObject.addProperty("uuid", request.getFriendId().toString());
                 requestObject.addProperty("name", request.getUsername());
@@ -136,17 +152,34 @@ public abstract class GaiaMasterUserDataPacket extends GaiaMasterPacket {
         }
     }
     public static class Cosmetics extends GaiaMasterUserDataPacket {
-        public Cosmetics(UUID uuid) {
+        private List<CommonProfileCosmetic> cosmetics;
+        public Cosmetics(UUID uuid, List<CommonProfileCosmetic> cosmetics) {
             super(uuid);
+            this.cosmetics = cosmetics;
         }
         @Override
         public void read(JsonObject object) {
             super.read(object);
+            for (JsonElement element : object.getAsJsonArray("cosmetics")) {
+                JsonObject cosmeticObject = element.getAsJsonObject();
+                String cosmeticName = cosmeticObject.get("cosmetic").getAsString();
+                CommonCosmetic cosmetic = GaiaServer.getCosmeticHandler().getCommonCosmetic(cosmeticName);
+                boolean active = cosmeticObject.get("active").getAsBoolean();
+                cosmetics.add(new CommonProfileCosmetic(cosmetic, active));
+            }
         }
 
         @Override
         public void write(JsonObject object) {
             super.write(object);
+            JsonArray cosmetics = new JsonArray();
+            for (CommonProfileCosmetic cosmetic : this.cosmetics) {
+                JsonObject cosmeticObject = new JsonObject();
+                cosmeticObject.addProperty("cosmetic", cosmetic.getCosmetic().getName());
+                cosmeticObject.addProperty("active", cosmetic.isActive());
+                cosmetics.add(cosmeticObject);
+            }
+            object.add("cosmetics", cosmetics);
         }
 
         @Override

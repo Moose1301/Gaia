@@ -2,12 +2,14 @@ package me.moose.gaia.common.packet;
 
 import me.moose.gaia.common.GaiaServer;
 import me.moose.gaia.common.packet.handler.IGaiaPacketHandler;
+import me.moose.gaia.common.packet.packets.master.GaiaMasterCosmeticListUpdate;
 import me.moose.gaia.common.packet.packets.master.GaiaMasterSlaveServerInfoPacket;
 import me.moose.gaia.common.packet.packets.master.GaiaMasterStatusPacket;
 import me.moose.gaia.common.packet.packets.master.GaiaMasterUserDataPacket;
 import me.moose.gaia.common.packet.packets.slave.GaiaSlaveRequestUserDataPacket;
-import me.moose.gaia.common.packet.packets.slave.GaiaSlaveServerStartPacket;
+import me.moose.gaia.common.packet.packets.slave.GaiaSlaveStatusPacket;
 import me.moose.gaia.common.packet.packets.slave.GaiaSlaveUserJoinPacket;
+import me.moose.gaia.common.utils.Logger;
 
 import java.util.HashMap;
 
@@ -21,6 +23,7 @@ public enum PacketRegistry {
             registerPacket(GaiaMasterSlaveServerInfoPacket.class);
             registerPacket(GaiaMasterStatusPacket.Startup.class);
             registerPacket(GaiaMasterStatusPacket.Shutdown.class);
+            registerPacket(GaiaMasterCosmeticListUpdate.class);
 
             //User Data Shit
             registerPacket(GaiaMasterUserDataPacket.Loaded.class);
@@ -31,11 +34,14 @@ public enum PacketRegistry {
     },
     SLAVE {
         {
-            registerPacket(GaiaSlaveServerStartPacket.class);
+            registerPacket(GaiaSlaveStatusPacket.Startup.class);
+            registerPacket(GaiaSlaveStatusPacket.Started.class);
+            registerPacket(GaiaSlaveStatusPacket.Shutdown.class);
             registerPacket(GaiaSlaveUserJoinPacket.class);
             registerPacket(GaiaSlaveRequestUserDataPacket.class);
 
         }
+
     };
 
 
@@ -47,7 +53,9 @@ public enum PacketRegistry {
             throw new IllegalArgumentException("Packet " + packetClass.getSimpleName() + " was registered twice!");
 
         int id = registeredPackets.size();
-        GaiaServer.getLogger().debug("PacketRegistry", "Registered: " + packetClass.getSimpleName() + " to " + id);
+
+        GaiaServer.getLogger().debug("PacketRegistry", "Registered " + name() + " Packet: " + packetClass.getSimpleName() + " to " + id,
+                Logger.DebugType.SUCCESS);
         registeredPackets.put(id, packetClass);
         reverseLookup.put(packetClass, id);
     }

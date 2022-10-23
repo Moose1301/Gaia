@@ -1,7 +1,9 @@
-package me.moose.gaia.common.cosmetic.data;
+package me.moose.gaia.master.cosmetic.data;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import me.moose.gaia.common.cosmetic.data.CommonCosmetic;
 import me.moose.gaia.common.cosmetic.type.CosmeticType;
 import org.bson.Document;
 
@@ -20,8 +22,10 @@ public class Cosmetic {
     private float scale;
     private final String resourceLocation;
 
+    @Getter(AccessLevel.PRIVATE)
+    private CommonCosmetic commonCosmetic;
     @ConstructorProperties({ "name", "type", "resourceLocation", "special" })
-    public Cosmetic(String name, String type, String resourceLocation, boolean special) {
+    public Cosmetic(String name, String type, String resourceLocation) {
         this.uuid = UUID.randomUUID();
         this.name = name;
         this.type = type;
@@ -53,7 +57,16 @@ public class Cosmetic {
         this.resourceLocation = document.getString("resourceLocation");
     }
 
-
+    public CommonCosmetic toCommon() {
+        if(commonCosmetic == null) {
+            commonCosmetic = new CommonCosmetic(uuid, name, type, scale, resourceLocation);
+        }
+        return commonCosmetic;
+    }
+    public void setScale(float scale) {
+        this.scale = scale;
+        commonCosmetic = new CommonCosmetic(uuid, name, type, scale, resourceLocation);
+    }
     public String getPrettyName() {
         return this.name.replaceAll("_", " ");
     }

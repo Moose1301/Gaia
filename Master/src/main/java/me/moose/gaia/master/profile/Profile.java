@@ -2,6 +2,9 @@ package me.moose.gaia.master.profile;
 
 import lombok.Getter;
 import lombok.Setter;
+import me.moose.gaia.common.profile.cosmetic.CommonProfileCosmetic;
+import me.moose.gaia.common.profile.friend.CommonFriend;
+import me.moose.gaia.common.profile.friend.CommonFriendRequest;
 import me.moose.gaia.master.profile.cosmetic.ProfileCosmetic;
 import me.moose.gaia.master.profile.crash.CrashReport;
 import me.moose.gaia.master.profile.friend.Friend;
@@ -14,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @author Moose1301
@@ -35,7 +39,7 @@ public class Profile {
     @Getter @Setter private boolean banned = false;
 
     @Getter @Setter private String version;
-    @Getter @Setter private Rank rankType = Rank.DEFAULT;
+    @Getter @Setter private Rank rank = Rank.DEFAULT;
     @Getter @Setter private FriendStatus status = FriendStatus.HIDDEN;
 
     @Getter @Setter private long offlineSince;
@@ -53,5 +57,16 @@ public class Profile {
         this.friendRequests = new ArrayList<>();
 
         this.crashReports = new ArrayList<>();
+    }
+
+
+    public List<CommonFriend> getCommonFriends() {
+        return friends.stream().map(Friend::toCommon).collect(Collectors.toList());
+    }
+    public List<CommonFriendRequest> getCommonFriendRequests() {
+        return friendRequests.stream().map(FriendRequest::toCommon).collect(Collectors.toList());
+    }
+    public List<CommonProfileCosmetic> getCommonCosmetics() {
+        return cosmetics.stream().map(ProfileCosmetic::toCommon).collect(Collectors.toList());
     }
 }

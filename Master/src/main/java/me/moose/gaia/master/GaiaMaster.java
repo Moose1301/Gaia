@@ -10,9 +10,9 @@ import lombok.Getter;
 import me.moose.gaia.common.GaiaServer;
 import me.moose.gaia.common.IGaiaServer;
 import me.moose.gaia.common.packet.packets.master.GaiaMasterStatusPacket;
-import me.moose.gaia.common.packet.packets.slave.GaiaSlaveServerStartPacket;
 import me.moose.gaia.common.redis.RedisHandler;
 import me.moose.gaia.common.utils.Logger;
+import me.moose.gaia.master.cosmetic.CosmeticHandler;
 import me.moose.gaia.master.packet.GaiaMasterPacketHandler;
 import me.moose.gaia.master.profile.ProfileHandler;
 import me.moose.gaia.master.server.ServerHandler;
@@ -34,6 +34,7 @@ public class GaiaMaster implements IGaiaServer {
     private RedisHandler redisHandler;
     private ServerHandler serverHandler;
     private ProfileHandler profileHandler;
+    private CosmeticHandler cosmeticHandler;
     private GaiaConfig config;
 
     private MongoClient client;
@@ -43,14 +44,18 @@ public class GaiaMaster implements IGaiaServer {
 
 
     public GaiaMaster() {
+        logger = new Logger("Gaia", true);
         GaiaServer.setInstance(this);
         config = new GaiaConfig();
         instance = this;
         executor = Executors.newScheduledThreadPool(1);
-        logger = new Logger("Gaia", true);
-        serverHandler = new ServerHandler();
-        packetHandler = new GaiaMasterPacketHandler();
+
+
         connectToMongo();
+        serverHandler = new ServerHandler();
+        cosmeticHandler = new CosmeticHandler();
+        packetHandler = new GaiaMasterPacketHandler();
+
         profileHandler = new ProfileHandler();
         redisHandler = new RedisHandler(
                 "127.0.0.1",
@@ -74,6 +79,7 @@ public class GaiaMaster implements IGaiaServer {
     }
 
     public void connectToMongo() {
+
         client = new MongoClient(new ServerAddress(config.getMongoHost(), config.getMongoPort()));
         database = client.getDatabase(config.getMongoDatabase());
     }

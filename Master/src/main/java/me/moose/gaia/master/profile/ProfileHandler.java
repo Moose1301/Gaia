@@ -29,6 +29,9 @@ public class ProfileHandler {
 
         //TODO LOAD PROFILES!!
     }
+    public Profile getProfile(UUID uuid) {
+        return profiles.get(uuid);
+    }
     public Profile getProfileOrLoad(UUID uuid, String username) {
         if(profiles.containsKey(uuid)) {
             return profiles.get(uuid);
@@ -87,7 +90,7 @@ public class ProfileHandler {
         }
 
         if (document.containsKey("rank")) {
-            profile.setRankType(Rank.valueOf(document.getString("rank")));
+            profile.setRank(Rank.valueOf(document.getString("rank")));
         }
         GaiaServer.getLogger().debug("ProfileHandler", "Loaded " + profile.getUsername() + " profile in "
                 + (System.currentTimeMillis() - start) + "ms", Logger.DebugType.SUCCESS);
@@ -107,7 +110,7 @@ public class ProfileHandler {
         document.put("friendRequests", profile.getFriendRequests().stream().map(FriendRequest::toDocument).collect(Collectors.toList()));
 
         document.put("offlineSince", profile.getOfflineSince());
-        document.put("rank", profile.getRankType().name());
+        document.put("rank", profile.getRank().name());
 
 
         try {

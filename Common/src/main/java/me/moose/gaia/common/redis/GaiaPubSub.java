@@ -42,6 +42,7 @@ public class GaiaPubSub extends JedisPubSub {
         GaiaPacket<IGaiaPacketHandler> gaiaPacket = null;
         try {
             gaiaPacket = registry.createPacket(id);
+            gaiaPacket.setSendingID(sender);
             gaiaPacket.read(data);
             GaiaServer.getInstance().getLogger().debug("RedisHandler", "Handling Packet: " + gaiaPacket.getClass().getSimpleName());
             gaiaPacket.handle(redisHandler.getPacketHandler());

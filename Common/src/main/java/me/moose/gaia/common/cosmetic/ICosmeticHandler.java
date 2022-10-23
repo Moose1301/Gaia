@@ -1,9 +1,6 @@
 package me.moose.gaia.common.cosmetic;
 
-import me.moose.gaia.common.cosmetic.data.Cosmetic;
-
-import java.util.Map;
-import java.util.Optional;
+import me.moose.gaia.common.cosmetic.data.CommonCosmetic;
 
 /**
  * @author Moose1301
@@ -11,7 +8,6 @@ import java.util.Optional;
  */
 public interface ICosmeticHandler {
 
-    Map<String, Cosmetic> getCosmetics();
-    void addCosmetic(Cosmetic cosmetic);
-    Optional<Cosmetic> getCosmetic(String name);
+
+    CommonCosmetic getCommonCosmetic(String name);
 }

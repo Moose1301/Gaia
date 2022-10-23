@@ -26,4 +26,11 @@ public class ServerHandler {
                 " (ID: " + id + ", Region: " + region + ")", Logger.DebugType.SUCCESS);
         return server;
     }
+    public void removeServer(String id) {
+        Server server = servers.remove(id);
+        if(server != null) {
+            GaiaServer.getInstance().getLogger().debug("ServerHandler", "Removed Slave Server with ID: " + id +
+                    " (Real ID: " + server.getRealId() + ", Region: " + server.getRegion() + ")", Logger.DebugType.SUCCESS);
+        }
+    }
 }
