@@ -9,7 +9,9 @@ import me.moose.gaia.common.profile.friend.status.FriendStatus;
 import me.moose.gaia.common.profile.rank.Rank;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 /**
  * @author Moose1301
@@ -38,5 +40,9 @@ public class Profile {
         this.uuid = uuid;
         this.username = username;
         this.completelyLoaded = false;
+    }
+
+    public Optional<CommonFriend> getFriend(UUID uuid) {
+        return friends.stream().filter(commonFriend -> commonFriend.getUuid().equals(uuid)).findFirst();
     }
 }

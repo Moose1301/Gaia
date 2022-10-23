@@ -38,6 +38,7 @@ public class ProfileHandler {
         }
         Profile profile = new Profile(uuid, username);
         load(profile);
+        profile.updateFriends();
         profiles.put(uuid, profile);
         return profile;
     }

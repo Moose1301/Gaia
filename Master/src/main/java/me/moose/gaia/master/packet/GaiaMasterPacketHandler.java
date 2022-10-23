@@ -4,21 +4,27 @@ import me.moose.gaia.common.GaiaServer;
 import me.moose.gaia.common.packet.handler.IGaiaMasterPacketHandler;
 import me.moose.gaia.common.packet.packets.master.*;
 import me.moose.gaia.common.packet.packets.master.cosmetics.GaiaMasterCosmeticListUpdate;
+import me.moose.gaia.common.packet.packets.master.friend.GaiaMasterUserFriendUpdatePacket;
 import me.moose.gaia.common.packet.packets.master.server.GaiaMasterSlaveServerInfoPacket;
 import me.moose.gaia.common.packet.packets.master.user.GaiaMasterUserDataPacket;
 import me.moose.gaia.common.packet.packets.master.user.GaiaMasterUserKickPacket;
+import me.moose.gaia.common.packet.packets.slave.friend.GaiaSlaveUserFriendStatusChangePacket;
 import me.moose.gaia.common.packet.packets.slave.friend.GaiaSlaveUserRequestStateUpdatePacket;
 import me.moose.gaia.common.packet.packets.slave.user.GaiaSlaveRequestUserDataPacket;
 import me.moose.gaia.common.packet.packets.slave.server.GaiaSlaveStatusPacket;
 import me.moose.gaia.common.packet.packets.slave.user.GaiaSlaveUserCrashReportPacket;
 import me.moose.gaia.common.packet.packets.slave.user.GaiaSlaveUserJoinPacket;
 import me.moose.gaia.common.packet.packets.slave.user.GaiaSlaveUserLeavePacket;
+import me.moose.gaia.common.profile.friend.CommonFriend;
 import me.moose.gaia.common.utils.Logger;
 import me.moose.gaia.master.GaiaMaster;
+import me.moose.gaia.master.profile.friend.Friend;
 import me.moose.gaia.master.utils.KickConstants;
 import me.moose.gaia.master.profile.Profile;
 import me.moose.gaia.master.profile.crash.CrashReport;
 import me.moose.gaia.master.server.Server;
+
+import java.util.function.Consumer;
 
 /**
  * @author Moose1301
@@ -59,11 +65,50 @@ public class GaiaMasterPacketHandler implements IGaiaMasterPacketHandler {
         Server server = GaiaMaster.getInstance().getServerHandler().getServer(packet.getSendingID());
         server.getProfiles().add(packet.getUuid());
 
+        for (Friend friend : profile.getFriends()) {
+            if(friend.getProfile() != null) {
+                Profile friendProfile = friend.getProfile();
+                friendProfile.getFriend(profile.getUniqueId()).ifPresent(friend1 -> {
+                    friend1.setOnline(true);
+                    if(friendProfile.isOnline()) {
+                        GaiaServer.getRedisHandler().sendPacket(
+                                new GaiaMasterUserFriendUpdatePacket(friend.getPlayerId(), friend1.toCommon()),
+                                friendProfile.getCurrentSlave()
+                        );
+                    }
+                });
+            }
+
+        }
+
+
     }
     @Override
     public void handle(GaiaSlaveUserLeavePacket packet) {
         Server server = GaiaMaster.getInstance().getServerHandler().getServer(packet.getSendingID());
         server.getProfiles().remove(packet.getUuid());
+        Profile profile = GaiaMaster.getInstance().getProfileHandler().getProfile(packet.getUuid());
+        if(profile == null) {
+            return;
+        }
+        profile.setOfflineSince(System.currentTimeMillis());
+        for (Friend friend : profile.getFriends()) {
+            if(friend.getProfile() != null) {
+                Profile friendProfile = friend.getProfile();
+                friendProfile.getFriend(profile.getUniqueId()).ifPresent(friend1 -> {
+                    friend1.setOnline(false);
+                    friend1.setOfflineSince(profile.getOfflineSince());
+                    if(friendProfile.isOnline()) {
+                        GaiaServer.getRedisHandler().sendPacket(
+                                new GaiaMasterUserFriendUpdatePacket(friend.getPlayerId(), friend1.toCommon()),
+                                friendProfile.getCurrentSlave()
+                        );
+                    }
+                });
+            }
+
+        }
+
 
     }
     @Override
@@ -128,5 +173,29 @@ public class GaiaMasterPacketHandler implements IGaiaMasterPacketHandler {
             return;
         }
         profile.setAcceptingRequests(packet.isFriendRequests());
+    }
+
+    @Override
+    public void handle(GaiaSlaveUserFriendStatusChangePacket packet) {
+        Profile profile = GaiaMaster.getInstance().getProfileHandler().getProfile(packet.getUuid());
+        if(profile == null) {
+            return;
+        }
+        profile.setStatus(packet.getStatus());
+        CommonFriend profileFriend = profile.toFriend();
+        for (Friend friend : profile.getFriends()) {
+            if(friend.getProfile() != null) {
+                Profile friendProfile = friend.getProfile();
+                friendProfile.getFriend(profile.getUniqueId()).ifPresent(friend1 -> friend1.setOnlineStatus(profile.getStatus()));
+                if(profile.isOnline()) {
+                    GaiaServer.getRedisHandler().sendPacket(
+                            new GaiaMasterUserFriendUpdatePacket(friend.getPlayerId(), profileFriend),
+                            friendProfile.getCurrentSlave()
+                    );
+                }
+            }
+        }
+
+        GaiaServer.getLogger().debug("PacketHandler", "Updated " + profile.getUsername() + " Friends with their new status", Logger.DebugType.SUCCESS);
     }
 }

@@ -2,8 +2,11 @@ package me.moose.gaia.master.profile.friend;
 
 import lombok.Getter;
 import lombok.Setter;
+import me.moose.gaia.common.GaiaServer;
 import me.moose.gaia.common.profile.friend.CommonFriend;
 import me.moose.gaia.common.profile.friend.status.FriendStatus;
+import me.moose.gaia.master.GaiaMaster;
+import me.moose.gaia.master.profile.Profile;
 import org.bson.Document;
 
 import java.util.UUID;
@@ -50,6 +53,9 @@ public class Friend {
         document.append("name", name);
 
         return document;
+    }
+    public Profile getProfile() {
+        return GaiaMaster.getInstance().getProfileHandler().getProfile(playerId);
     }
     public CommonFriend toCommon() {
         return new CommonFriend(playerId, name,  status, server, online, offlineSince, onlineStatus);

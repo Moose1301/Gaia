@@ -3,6 +3,7 @@ package me.moose.gaia.slave.packet;
 import me.moose.gaia.common.GaiaServer;
 import me.moose.gaia.common.packet.handler.IGaiaSlavePacketHandler;
 import me.moose.gaia.common.packet.packets.master.cosmetics.GaiaMasterCosmeticListUpdate;
+import me.moose.gaia.common.packet.packets.master.friend.GaiaMasterUserFriendUpdatePacket;
 import me.moose.gaia.common.packet.packets.master.server.GaiaMasterSlaveServerInfoPacket;
 import me.moose.gaia.common.packet.packets.master.server.GaiaMasterStatusPacket;
 import me.moose.gaia.common.packet.packets.master.user.GaiaMasterUserDataPacket;
@@ -12,11 +13,13 @@ import me.moose.gaia.common.packet.packets.master.user.GaiaMasterUserMessagePack
 import me.moose.gaia.common.packet.packets.slave.user.GaiaSlaveRequestUserDataPacket;
 import me.moose.gaia.common.packet.packets.slave.server.GaiaSlaveStatusPacket;
 import me.moose.gaia.common.packet.packets.slave.user.GaiaSlaveUserJoinPacket;
+import me.moose.gaia.common.profile.friend.CommonFriend;
 import me.moose.gaia.common.utils.Logger;
 import me.moose.gaia.slave.GaiaSlave;
 import me.moose.gaia.slave.profile.data.Profile;
 
 import java.util.UUID;
+import java.util.function.Consumer;
 
 /**
  * @author Moose1301
@@ -138,5 +141,15 @@ public class GaiaSlavePacketHandler implements IGaiaSlavePacketHandler {
     @Override
     public void handle(GaiaMasterUserMessagePacket.Notification packet) {
         //TODO SEND USER NOTIFICATION
+    }
+
+    @Override
+    public void handle(GaiaMasterUserFriendUpdatePacket packet) {
+        Profile profile = GaiaSlave.getInstance().getProfileHandler().getProfile(packet.getUuid());
+        if(profile == null) {
+            GaiaServer.getLogger().error("PacketHandler", "Master sent a Friend Update with UUID \"" + packet.getUuid().toString() + "\"");
+            return;
+        }
+        profile.getFriend(packet.getFriend().getUuid()).ifPresent(commonFriend -> commonFriend.update(packet.getFriend()));
     }
 }

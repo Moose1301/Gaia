@@ -13,10 +13,9 @@ import me.moose.gaia.common.profile.friend.status.FriendStatus;
 import me.moose.gaia.common.profile.rank.Rank;
 
 import java.beans.ConstructorProperties;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -64,7 +63,16 @@ public class Profile {
 
         this.crashReports = new ArrayList<>();
     }
+    public boolean isOnline() {
+        return currentSlave != null;
+    }
+    public Optional<Friend> getFriend(UUID uuid) {
+        return friends.stream().filter(friend -> friend.getPlayerId().equals(uuid)).findFirst();
+    }
 
+    public CommonFriend toFriend() {
+        return new CommonFriend(uniqueId, username, null, server, currentSlave != null, offlineSince, status);
+    }
 
     public List<CommonFriend> getCommonFriends() {
         return friends.stream().map(Friend::toCommon).collect(Collectors.toList());
@@ -74,5 +82,28 @@ public class Profile {
     }
     public List<CommonProfileCosmetic> getCommonCosmetics() {
         return cosmetics.stream().map(ProfileCosmetic::toCommon).collect(Collectors.toList());
+    }
+    public void updateFriends() {
+        for (Friend friend : friends) {
+            Profile profile = friend.getProfile();
+            if(profile != null) {
+                friend.setName(profile.getUsername());
+                friend.setServer(profile.getServer());
+                friend.setOnline(profile.isOnline());
+                friend.setOfflineSince(profile.getOfflineSince());
+                friend.setOnlineStatus(profile.getStatus());
+                friend.setClientVersion(profile.getVersion());
+
+                profile.getFriend(friend.getPlayerId()).ifPresent(friend1 -> {
+                    friend1.setName(getUsername());
+                    friend1.setServer(getServer());
+                    friend1.setOnline(isOnline());
+                    friend1.setOfflineSince(getOfflineSince());
+                    friend1.setOnlineStatus(getStatus());
+                    friend1.setClientVersion(getVersion());
+                });
+            }
+
+        }
     }
 }
