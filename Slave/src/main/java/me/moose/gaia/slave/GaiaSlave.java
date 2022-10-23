@@ -1,0 +1,50 @@
+package me.moose.gaia.slave;
+
+import lombok.Getter;
+import me.moose.gaia.common.GaiaServer;
+import me.moose.gaia.common.IGaiaServer;
+import me.moose.gaia.common.packet.packets.slave.GaiaSlaveServerStartPacket;
+import me.moose.gaia.common.redis.RedisHandler;
+import me.moose.gaia.common.utils.Logger;
+import me.moose.gaia.slave.packet.GaiaSlavePacketHandler;
+
+/**
+ * @author Moose1301
+ * @date 10/22/2022
+ */
+@Getter
+public class GaiaSlave implements IGaiaServer {
+    @Getter
+    private static GaiaSlave instance;
+    private Logger logger;
+    private GaiaSlavePacketHandler packetHandler;
+    private RedisHandler redisHandler;
+
+    private GaiaConfig gaiaConfig;
+    public GaiaSlave() {
+        GaiaServer.setInstance(this);
+        instance = this;
+        gaiaConfig = new GaiaConfig();
+        logger = new Logger("Gaia", true);
+        packetHandler = new GaiaSlavePacketHandler();
+        redisHandler = new RedisHandler(
+                "127.0.0.1",
+                6379,
+                gaiaConfig.getId(),
+                packetHandler
+        );
+        redisHandler.sendPacket(new GaiaSlaveServerStartPacket(gaiaConfig.getId(), gaiaConfig.getRegion()));
+
+        //Stay Open
+        new Thread(new Runnable() {
+            @Override
+            public synchronized void run() {
+                for(;;)
+                    try {
+                        wait();
+                    } catch (InterruptedException e) {
+                    }
+            }
+        }).run();
+    }
+}
