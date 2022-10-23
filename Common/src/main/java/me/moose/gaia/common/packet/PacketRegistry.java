@@ -2,13 +2,21 @@ package me.moose.gaia.common.packet;
 
 import me.moose.gaia.common.GaiaServer;
 import me.moose.gaia.common.packet.handler.IGaiaPacketHandler;
-import me.moose.gaia.common.packet.packets.master.GaiaMasterCosmeticListUpdate;
-import me.moose.gaia.common.packet.packets.master.GaiaMasterSlaveServerInfoPacket;
-import me.moose.gaia.common.packet.packets.master.GaiaMasterStatusPacket;
-import me.moose.gaia.common.packet.packets.master.GaiaMasterUserDataPacket;
-import me.moose.gaia.common.packet.packets.slave.GaiaSlaveRequestUserDataPacket;
-import me.moose.gaia.common.packet.packets.slave.GaiaSlaveStatusPacket;
-import me.moose.gaia.common.packet.packets.slave.GaiaSlaveUserJoinPacket;
+import me.moose.gaia.common.packet.packets.master.cosmetics.GaiaMasterCosmeticListUpdate;
+import me.moose.gaia.common.packet.packets.master.friend.GaiaMasterUserFriendUpdatePacket;
+import me.moose.gaia.common.packet.packets.master.server.GaiaMasterSlaveServerInfoPacket;
+import me.moose.gaia.common.packet.packets.master.server.GaiaMasterStatusPacket;
+import me.moose.gaia.common.packet.packets.master.user.GaiaMasterUserDataPacket;
+import me.moose.gaia.common.packet.packets.master.user.GaiaMasterUserInteractionPacket;
+import me.moose.gaia.common.packet.packets.master.user.GaiaMasterUserKickPacket;
+import me.moose.gaia.common.packet.packets.master.user.GaiaMasterUserMessagePacket;
+import me.moose.gaia.common.packet.packets.slave.friend.GaiaSlaveUserFriendStatusChangePacket;
+import me.moose.gaia.common.packet.packets.slave.friend.GaiaSlaveUserRequestStateUpdatePacket;
+import me.moose.gaia.common.packet.packets.slave.server.GaiaSlaveStatusPacket;
+import me.moose.gaia.common.packet.packets.slave.user.GaiaSlaveRequestUserDataPacket;
+import me.moose.gaia.common.packet.packets.slave.user.GaiaSlaveUserCrashReportPacket;
+import me.moose.gaia.common.packet.packets.slave.user.GaiaSlaveUserJoinPacket;
+import me.moose.gaia.common.packet.packets.slave.user.GaiaSlaveUserLeavePacket;
 import me.moose.gaia.common.utils.Logger;
 
 import java.util.HashMap;
@@ -30,6 +38,17 @@ public enum PacketRegistry {
             registerPacket(GaiaMasterUserDataPacket.Data.class);
             registerPacket(GaiaMasterUserDataPacket.Friends.class);
             registerPacket(GaiaMasterUserDataPacket.Cosmetics.class);
+            registerPacket(GaiaMasterUserKickPacket.class);
+
+            //User Interaction Shit
+            registerPacket(GaiaMasterUserInteractionPacket.Crash.class);
+            registerPacket(GaiaMasterUserMessagePacket.ConsoleMessage.class);
+            registerPacket(GaiaMasterUserMessagePacket.Notification.class);
+
+            //Friend Shit
+            registerPacket(GaiaMasterUserFriendUpdatePacket.class);
+
+            GaiaServer.getLogger().debug("PacketRegistry", "Registered " + registeredPackets.size() + " Master Packets");
         }
     },
     SLAVE {
@@ -38,15 +57,21 @@ public enum PacketRegistry {
             registerPacket(GaiaSlaveStatusPacket.Started.class);
             registerPacket(GaiaSlaveStatusPacket.Shutdown.class);
             registerPacket(GaiaSlaveUserJoinPacket.class);
+            registerPacket(GaiaSlaveUserLeavePacket.class);
             registerPacket(GaiaSlaveRequestUserDataPacket.class);
+            registerPacket(GaiaSlaveUserCrashReportPacket.class);
+            registerPacket(GaiaSlaveUserFriendStatusChangePacket.class);
 
+
+
+            GaiaServer.getLogger().debug("PacketRegistry", "Registered " + registeredPackets.size() + " Slave Packets");
         }
 
     };
 
 
-    private final HashMap<Integer, Class<? extends GaiaPacket<?>>> registeredPackets = new HashMap<>();
-    private final HashMap<Class<? extends GaiaPacket<?>>, Integer> reverseLookup = new HashMap<>();
+    protected final HashMap<Integer, Class<? extends GaiaPacket<?>>> registeredPackets = new HashMap<>();
+    protected final HashMap<Class<? extends GaiaPacket<?>>, Integer> reverseLookup = new HashMap<>();
 
     protected void registerPacket(Class<? extends GaiaPacket<?>> packetClass) {
         if (registeredPackets.containsValue(packetClass))

@@ -1,14 +1,14 @@
-package me.moose.gaia.common.packet.packets.master;
+package me.moose.gaia.common.packet.packets.master.user;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import me.moose.gaia.common.GaiaServer;
 import me.moose.gaia.common.cosmetic.data.CommonCosmetic;
 import me.moose.gaia.common.packet.handler.IGaiaSlavePacketHandler;
+import me.moose.gaia.common.packet.packets.master.GaiaMasterPacket;
 import me.moose.gaia.common.profile.cosmetic.CommonProfileCosmetic;
 import me.moose.gaia.common.profile.friend.CommonFriend;
 import me.moose.gaia.common.profile.friend.CommonFriendRequest;
@@ -61,20 +61,34 @@ public abstract class GaiaMasterUserDataPacket extends GaiaMasterPacket {
     @NoArgsConstructor @Getter
     public static class Data extends GaiaMasterUserDataPacket {
         private Rank rank;
-        public Data(UUID uuid, Rank rank) {
+        private String version;
+        private String server;
+        private String commit;
+        public Data(UUID uuid, Rank rank, String version, String server, String commit) {
             super(uuid);
             this.rank = rank;
+            this.version = version;
+            this.server = server;
+            this.commit = commit;
         }
         @Override
         public void read(JsonObject object) {
             super.read(object);
             rank = Rank.valueOf(object.get("rank").getAsString());
+            version = object.get("version").getAsString();
+            server = object.get("server").getAsString();
+            commit = object.get("commit").getAsString();
+
         }
 
         @Override
         public void write(JsonObject object) {
             super.write(object);
             object.addProperty("rank", rank.name());
+            object.addProperty("version", version);
+            object.addProperty("server", server);
+            object.addProperty("commit", commit);
+
         }
 
         @Override

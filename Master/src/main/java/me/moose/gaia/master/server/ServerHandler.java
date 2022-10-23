@@ -2,6 +2,8 @@ package me.moose.gaia.master.server;
 
 import me.moose.gaia.common.GaiaServer;
 import me.moose.gaia.common.utils.Logger;
+import me.moose.gaia.master.GaiaMaster;
+import me.moose.gaia.master.profile.Profile;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,6 +33,10 @@ public class ServerHandler {
         if(server != null) {
             GaiaServer.getInstance().getLogger().debug("ServerHandler", "Removed Slave Server with ID: " + id +
                     " (Real ID: " + server.getRealId() + ", Region: " + server.getRegion() + ")", Logger.DebugType.SUCCESS);
+            for (UUID uuid : server.getProfiles()) {
+                Profile profile = GaiaMaster.getInstance().getProfileHandler().getProfile(uuid);
+                profile.setCurrentSlave(null);
+            }
         }
     }
 }

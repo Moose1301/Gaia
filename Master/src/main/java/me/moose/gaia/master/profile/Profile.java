@@ -23,26 +23,32 @@ import java.util.stream.Collectors;
  * @author Moose1301
  * @date 10/22/2022
  */
+@Getter @Setter
 public class Profile {
-    @Getter private final UUID uniqueId;
-    @Getter private final String username;
-    @Getter private final HashSet<Friend> friends;
-    @Getter private final List<FriendRequest> friendRequests;
-    @Getter private final List<ProfileCosmetic> cosmetics;
-    @Getter private final List<CrashReport> crashReports;
+    private final UUID uniqueId;
+    private final String username;
+    private final HashSet<Friend> friends;
+    private final List<FriendRequest> friendRequests;
+    private final List<ProfileCosmetic> cosmetics;
+    private final List<CrashReport> crashReports;
 
-    @Getter @Setter private boolean acceptingRequests = true;
+    private boolean acceptingRequests = true;
 
-    @Getter @Setter private String commitVersion;
-    @Getter @Setter private String server;
+    private String commit;
+    private String server;
 
-    @Getter @Setter private boolean banned = false;
+    private boolean banned = false;
 
-    @Getter @Setter private String version;
-    @Getter @Setter private Rank rank = Rank.DEFAULT;
-    @Getter @Setter private FriendStatus status = FriendStatus.HIDDEN;
+    private String version;
+    private Rank rank = Rank.DEFAULT;
+    private FriendStatus status = FriendStatus.HIDDEN;
 
-    @Getter @Setter private long offlineSince;
+    private long offlineSince;
+
+    /**
+     * The Current Slave Instance the user is on. Null if Offline
+     */
+    private transient String currentSlave;
 
     @ConstructorProperties({ "uniqueId", "username" })
     public Profile(UUID uniqueId, String username) {

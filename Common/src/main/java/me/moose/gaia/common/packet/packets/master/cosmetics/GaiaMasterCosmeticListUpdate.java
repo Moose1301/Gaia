@@ -1,4 +1,4 @@
-package me.moose.gaia.common.packet.packets.master;
+package me.moose.gaia.common.packet.packets.master.cosmetics;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import me.moose.gaia.common.cosmetic.data.CommonCosmetic;
 import me.moose.gaia.common.packet.handler.IGaiaSlavePacketHandler;
+import me.moose.gaia.common.packet.packets.master.GaiaMasterPacket;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,7 +1,8 @@
-package me.moose.gaia.common.packet.packets.master;
+package me.moose.gaia.common.packet.packets.master.server;
 
 import com.google.gson.JsonObject;
 import me.moose.gaia.common.packet.handler.IGaiaSlavePacketHandler;
+import me.moose.gaia.common.packet.packets.master.GaiaMasterPacket;
 
 /**
  * @author Moose1301

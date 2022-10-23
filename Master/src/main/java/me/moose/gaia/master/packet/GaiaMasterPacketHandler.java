@@ -2,15 +2,22 @@ package me.moose.gaia.master.packet;
 
 import me.moose.gaia.common.GaiaServer;
 import me.moose.gaia.common.packet.handler.IGaiaMasterPacketHandler;
-import me.moose.gaia.common.packet.packets.master.GaiaMasterCosmeticListUpdate;
-import me.moose.gaia.common.packet.packets.master.GaiaMasterPacket;
-import me.moose.gaia.common.packet.packets.master.GaiaMasterSlaveServerInfoPacket;
-import me.moose.gaia.common.packet.packets.master.GaiaMasterUserDataPacket;
-import me.moose.gaia.common.packet.packets.slave.GaiaSlaveRequestUserDataPacket;
-import me.moose.gaia.common.packet.packets.slave.GaiaSlaveStatusPacket;
-import me.moose.gaia.common.packet.packets.slave.GaiaSlaveUserJoinPacket;
+import me.moose.gaia.common.packet.packets.master.*;
+import me.moose.gaia.common.packet.packets.master.cosmetics.GaiaMasterCosmeticListUpdate;
+import me.moose.gaia.common.packet.packets.master.server.GaiaMasterSlaveServerInfoPacket;
+import me.moose.gaia.common.packet.packets.master.user.GaiaMasterUserDataPacket;
+import me.moose.gaia.common.packet.packets.master.user.GaiaMasterUserKickPacket;
+import me.moose.gaia.common.packet.packets.slave.friend.GaiaSlaveUserRequestStateUpdatePacket;
+import me.moose.gaia.common.packet.packets.slave.user.GaiaSlaveRequestUserDataPacket;
+import me.moose.gaia.common.packet.packets.slave.server.GaiaSlaveStatusPacket;
+import me.moose.gaia.common.packet.packets.slave.user.GaiaSlaveUserCrashReportPacket;
+import me.moose.gaia.common.packet.packets.slave.user.GaiaSlaveUserJoinPacket;
+import me.moose.gaia.common.packet.packets.slave.user.GaiaSlaveUserLeavePacket;
+import me.moose.gaia.common.utils.Logger;
 import me.moose.gaia.master.GaiaMaster;
+import me.moose.gaia.master.utils.KickConstants;
 import me.moose.gaia.master.profile.Profile;
+import me.moose.gaia.master.profile.crash.CrashReport;
 import me.moose.gaia.master.server.Server;
 
 /**
@@ -37,11 +44,28 @@ public class GaiaMasterPacketHandler implements IGaiaMasterPacketHandler {
     }
     @Override
     public void handle(GaiaSlaveUserJoinPacket packet) {
-        GaiaMaster.getInstance().getProfileHandler().getProfileOrLoad(packet.getUuid(), packet.getUsername());
+        Profile profile = GaiaMaster.getInstance().getProfileHandler().getProfileOrLoad(packet.getUuid(), packet.getUsername());
+        if(profile.isBanned()) {
+            GaiaServer.getRedisHandler().sendPacket(new GaiaMasterUserKickPacket(packet.getUuid(), KickConstants.USER_BANNED));
+            return;
+        }
+        profile.setCurrentSlave(packet.getSendingID());
+        profile.setVersion(packet.getVersion());
+        profile.setCommit(packet.getCommit());
+        profile.setServer(packet.getServer());
+
+
         GaiaServer.getRedisHandler().sendPacket(new GaiaMasterUserDataPacket.Loaded(packet.getUuid(), packet.getUsername()), packet.getSendingID());
+        Server server = GaiaMaster.getInstance().getServerHandler().getServer(packet.getSendingID());
+        server.getProfiles().add(packet.getUuid());
 
     }
+    @Override
+    public void handle(GaiaSlaveUserLeavePacket packet) {
+        Server server = GaiaMaster.getInstance().getServerHandler().getServer(packet.getSendingID());
+        server.getProfiles().remove(packet.getUuid());
 
+    }
     @Override
     public void handle(GaiaSlaveRequestUserDataPacket packet) {
         if(packet.getType() == GaiaSlaveRequestUserDataPacket.DataType.LOAD) {
@@ -58,7 +82,11 @@ public class GaiaMasterPacketHandler implements IGaiaMasterPacketHandler {
         GaiaMasterPacket sendingPacket = null;
         switch (packet.getType()) {
             case DATA:
-                sendingPacket = new GaiaMasterUserDataPacket.Data(profile.getUniqueId(), profile.getRank());
+                sendingPacket = new GaiaMasterUserDataPacket.Data(
+                        profile.getUniqueId(), profile.getRank(),
+                        profile.getVersion(), profile.getServer(),
+                        profile.getCommit()
+                );
                 break;
             case COSMETICS:
                 sendingPacket = new GaiaMasterUserDataPacket.Cosmetics(profile.getUniqueId(), profile.getCommonCosmetics());
@@ -71,6 +99,34 @@ public class GaiaMasterPacketHandler implements IGaiaMasterPacketHandler {
                 );
                 break;
         }
+        if(sendingPacket == null) {
+            return;
+        }
         GaiaServer.getRedisHandler().sendPacket(sendingPacket, packet.getSendingID());
+    }
+
+    @Override
+    public void handle(GaiaSlaveUserCrashReportPacket packet) {
+        Profile profile = GaiaMaster.getInstance().getProfileHandler().getProfile(packet.getUuid());
+        if(profile == null) {
+            return;
+        }
+        profile.getCrashReports().add(new CrashReport(
+                packet.getId(),
+                packet.getVersion(),
+                packet.getOs(),
+                packet.getMemory(),
+                packet.getStackTrace()
+        ));
+        GaiaServer.getLogger().debug("PacketHandler", "Added a Crash Report to " + profile.getUsername() + "'s profile", Logger.DebugType.SUCCESS);
+    }
+
+    @Override
+    public void handle(GaiaSlaveUserRequestStateUpdatePacket packet) {
+        Profile profile = GaiaMaster.getInstance().getProfileHandler().getProfile(packet.getUuid());
+        if(profile == null) {
+            return;
+        }
+        profile.setAcceptingRequests(packet.isFriendRequests());
     }
 }

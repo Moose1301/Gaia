@@ -2,14 +2,13 @@ package me.moose.gaia.slave.profile;
 
 import lombok.Getter;
 import me.moose.gaia.common.GaiaServer;
-import me.moose.gaia.common.packet.packets.slave.GaiaSlaveRequestUserDataPacket;
+import me.moose.gaia.common.packet.packets.slave.user.GaiaSlaveRequestUserDataPacket;
 import me.moose.gaia.slave.profile.data.Profile;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 
 /**
  * @author Moose1301
@@ -34,5 +33,8 @@ public class ProfileHandler {
         CompletableFuture<Profile> feature = new CompletableFuture<>();
         loadRequests.put(uuid, feature);
         return feature;
+    }
+    public void removeProfile(UUID uuid) {
+        profiles.remove(uuid);
     }
 }

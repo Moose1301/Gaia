@@ -1,5 +1,7 @@
 package me.moose.gaia.common;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import me.moose.gaia.common.cosmetic.ICosmeticHandler;
 import me.moose.gaia.common.redis.RedisHandler;
 import me.moose.gaia.common.utils.Logger;
@@ -9,6 +11,7 @@ import me.moose.gaia.common.utils.Logger;
  * @date 10/22/2022
  */
 public class GaiaServer {
+    public static Gson GSON_PRETTY = new GsonBuilder().setPrettyPrinting().create();
     private static IGaiaServer gaiaServer;
 
 

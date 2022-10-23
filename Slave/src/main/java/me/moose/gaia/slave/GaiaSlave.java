@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import me.moose.gaia.common.GaiaServer;
 import me.moose.gaia.common.IGaiaServer;
-import me.moose.gaia.common.packet.packets.slave.GaiaSlaveStatusPacket;
+import me.moose.gaia.common.packet.packets.slave.server.GaiaSlaveStatusPacket;
 import me.moose.gaia.common.redis.RedisHandler;
 import me.moose.gaia.common.utils.Logger;
 import me.moose.gaia.slave.cosmetic.CosmeticHandler;
@@ -33,13 +33,18 @@ public class GaiaSlave implements IGaiaServer {
         instance = this;
         connected = false;
         gaiaConfig = new GaiaConfig();
-
+        try {
+            gaiaConfig.load();
+        } catch (Exception ex) {
+            logger.error("Config", "Failed to load Gaia Config");
+            return;
+        }
         cosmeticHandler = new CosmeticHandler();
         profileHandler = new ProfileHandler();
         packetHandler = new GaiaSlavePacketHandler();
         redisHandler = new RedisHandler(
-                "127.0.0.1",
-                6379,
+                gaiaConfig.getRedisHost(),
+                gaiaConfig.getRedisPort(),
                 gaiaConfig.getId(),
                 packetHandler
         );

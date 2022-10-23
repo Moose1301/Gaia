@@ -41,6 +41,15 @@ public class ProfileHandler {
         profiles.put(uuid, profile);
         return profile;
     }
+    public List<Profile> getProfilesOnSlave(String serverId) {
+        List<Profile> profiles = new ArrayList<>();
+        for (Profile profile : this.profiles.values()) {
+            if(profile.getCurrentSlave().equals(serverId)) {
+                profiles.add(profile);
+            }
+        }
+        return profiles;
+    }
     public void load(Profile profile) {
         long start = System.currentTimeMillis();
         Document document = this.collection.find(Filters.eq("uuid", profile.getUniqueId())).first();

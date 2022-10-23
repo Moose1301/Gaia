@@ -1,16 +1,13 @@
 package me.moose.gaia.master;
 
 import com.mongodb.MongoClient;
-import com.mongodb.MongoClientOptions;
-import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOptions;
 import lombok.Getter;
 import me.moose.gaia.common.GaiaServer;
 import me.moose.gaia.common.IGaiaServer;
-import me.moose.gaia.common.packet.packets.master.GaiaMasterStatusPacket;
-import me.moose.gaia.common.packet.packets.slave.GaiaSlaveStatusPacket;
+import me.moose.gaia.common.packet.packets.master.server.GaiaMasterStatusPacket;
 import me.moose.gaia.common.redis.RedisHandler;
 import me.moose.gaia.common.utils.Logger;
 import me.moose.gaia.master.cosmetic.CosmeticHandler;
@@ -18,9 +15,9 @@ import me.moose.gaia.master.packet.GaiaMasterPacketHandler;
 import me.moose.gaia.master.profile.ProfileHandler;
 import me.moose.gaia.master.server.ServerHandler;
 
+import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 /**
  * @author Moose1301
@@ -48,6 +45,12 @@ public class GaiaMaster implements IGaiaServer {
         logger = new Logger("Gaia", true);
         GaiaServer.setInstance(this);
         config = new GaiaConfig();
+        try {
+            config.load();
+        } catch (IOException e) {
+            logger.error("Config", "Failed to load Gaia Config");
+            return;
+        }
         instance = this;
         executor = Executors.newScheduledThreadPool(1);
 

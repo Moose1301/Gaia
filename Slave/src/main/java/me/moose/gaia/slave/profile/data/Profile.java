@@ -22,6 +22,9 @@ public class Profile {
     private final String username;
 
     private Rank rank;
+    private String version;
+    private String server;
+    private String commit;
 
     private List<CommonFriend> friends;
     private List<CommonFriendRequest> friendRequests;

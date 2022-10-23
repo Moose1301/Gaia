@@ -1,10 +1,11 @@
-package me.moose.gaia.common.packet.packets.master;
+package me.moose.gaia.common.packet.packets.master.server;
 
 import com.google.gson.JsonObject;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import me.moose.gaia.common.packet.handler.IGaiaSlavePacketHandler;
+import me.moose.gaia.common.packet.packets.master.GaiaMasterPacket;
 
 /**
  * @author Moose1301
