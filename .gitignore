@@ -3,7 +3,7 @@
 *.iml
 *.iws
 
-# Mac
+# macOS
 .DS_Store
 
 # Maven
