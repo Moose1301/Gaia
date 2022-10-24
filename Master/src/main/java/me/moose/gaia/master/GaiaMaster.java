@@ -11,6 +11,7 @@ import me.moose.gaia.common.packet.packets.master.server.GaiaMasterSlaveRestartP
 import me.moose.gaia.common.packet.packets.master.server.GaiaMasterStatusPacket;
 import me.moose.gaia.common.redis.RedisHandler;
 import me.moose.gaia.common.utils.Logger;
+import me.moose.gaia.master.api.APIServer;
 import me.moose.gaia.master.command.CommandHandler;
 import me.moose.gaia.master.cosmetic.CosmeticHandler;
 import me.moose.gaia.master.packet.GaiaMasterPacketHandler;
@@ -37,8 +38,7 @@ public class GaiaMaster implements IGaiaServer {
     private CosmeticHandler cosmeticHandler;
     private CommandHandler commandHandler;
     private GaiaConfig config;
-
-
+    private APIServer apiServer;
     private MongoClient client;
 
     @Getter private MongoDatabase database;
@@ -64,11 +64,14 @@ public class GaiaMaster implements IGaiaServer {
         cosmeticHandler = new CosmeticHandler();
         commandHandler = new CommandHandler();
         packetHandler = new GaiaMasterPacketHandler();
+        if(config.getApiPort() != -1) {
+            apiServer = new APIServer();
+        }
 
         profileHandler = new ProfileHandler();
         redisHandler = new RedisHandler(
-                "127.0.0.1",
-                6379,
+                config.getRedisHost(),
+                config.getRedisPort(),
                 "master",
                 packetHandler
         );

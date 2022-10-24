@@ -14,15 +14,24 @@ import me.moose.gaia.common.packet.packets.slave.GaiaSlavePacket;
 @AllArgsConstructor @NoArgsConstructor @Getter
 public class GaiaSlaveHeartbeatPacket extends GaiaSlavePacket {
     private int unauthorizedUsers;
+    private double memoryUsage;
+    private double memoryMax;
+    private double memoryFree;
 
     @Override
     public void read(JsonObject object) {
         unauthorizedUsers = object.get("unauthorizedUsers").getAsInt();
+        memoryUsage = object.get("memoryUsage").getAsDouble();
+        memoryMax = object.get("memoryMax").getAsDouble();
+        memoryFree = object.get("memoryFree").getAsDouble();
     }
 
     @Override
     public void write(JsonObject object) {
         object.addProperty("unauthorizedUsers", unauthorizedUsers);
+        object.addProperty("memoryUsage", memoryUsage);
+        object.addProperty("memoryMax", memoryMax);
+        object.addProperty("memoryFree", memoryFree);
     }
 
     @Override

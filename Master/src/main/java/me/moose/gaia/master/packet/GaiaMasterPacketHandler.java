@@ -10,6 +10,7 @@ import me.moose.gaia.common.packet.packets.master.user.GaiaMasterUserDataPacket;
 import me.moose.gaia.common.packet.packets.master.user.GaiaMasterUserKickPacket;
 import me.moose.gaia.common.packet.packets.slave.friend.GaiaSlaveUserFriendStatusChangePacket;
 import me.moose.gaia.common.packet.packets.slave.friend.GaiaSlaveUserRequestStateUpdatePacket;
+import me.moose.gaia.common.packet.packets.slave.server.GaiaSlaveHeartbeatPacket;
 import me.moose.gaia.common.packet.packets.slave.user.*;
 import me.moose.gaia.common.packet.packets.slave.server.GaiaSlaveStatusPacket;
 import me.moose.gaia.common.profile.friend.CommonFriend;
@@ -47,6 +48,20 @@ public class GaiaMasterPacketHandler implements IGaiaMasterPacketHandler {
     public void handle(GaiaSlaveStatusPacket.Shutdown packet) {
         GaiaMaster.getInstance().getServerHandler().removeServer(packet.getSendingID());
     }
+
+    @Override
+    public void handle(GaiaSlaveHeartbeatPacket packet) {
+        Server server = GaiaMaster.getInstance().getServerHandler().getServer(packet.getSendingID());
+        if(server == null) {
+            return;
+        }
+        server.setUnauthorizedUsers(packet.getUnauthorizedUsers());
+        server.setMemoryMax(packet.getMemoryMax());
+        server.setMemoryUsage(packet.getMemoryUsage());
+        server.setMemoryFree(packet.getMemoryFree());
+
+    }
+
     @Override
     public void handle(GaiaSlaveUserJoinPacket packet) {
         Profile profile = GaiaMaster.getInstance().getProfileHandler().getProfileOrLoad(packet.getUuid(), packet.getUsername());

@@ -1,6 +1,7 @@
 package me.moose.gaia.master.server;
 
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -25,6 +26,10 @@ public class Server {
     private String region;
     private Set<UUID> profiles = new HashSet<>();
 
+    @Setter private int unauthorizedUsers;
+    @Setter private double memoryUsage;
+    @Setter private double memoryMax;
+    @Setter private double memoryFree;
 
     public Server(String realId, String id, String region) {
         this.realId = realId;

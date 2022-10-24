@@ -12,10 +12,14 @@ import me.moose.gaia.slave.cosmetic.CosmeticHandler;
 import me.moose.gaia.slave.packet.GaiaSlavePacketHandler;
 import me.moose.gaia.slave.profile.ProfileHandler;
 import me.moose.gaia.slave.socket.SlaveSocket;
+import me.moose.gaia.slave.tasks.HeartbeatTask;
 
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Moose1301
@@ -35,6 +39,8 @@ public class GaiaSlave implements IGaiaServer {
     private GaiaConfig gaiaConfig;
     private SlaveSocket slaveSocket;
 
+    private ScheduledExecutorService executor;
+
     private PublicKey publicKey;
     private PrivateKey privateKey;
 
@@ -42,6 +48,8 @@ public class GaiaSlave implements IGaiaServer {
         logger = new Logger("Gaia", true);
         GaiaServer.setInstance(this);
         instance = this;
+        executor = Executors.newScheduledThreadPool(1);
+
         connected = false;
         gaiaConfig = new GaiaConfig();
         try {
@@ -68,8 +76,8 @@ public class GaiaSlave implements IGaiaServer {
                 packetHandler
         );
         redisHandler.sendPacket(new GaiaSlaveStatusPacket.Startup(gaiaConfig.getId(), gaiaConfig.getRegion()));
-
         slaveSocket = new SlaveSocket();
+        executor.scheduleAtFixedRate(new HeartbeatTask(), 2, 2, TimeUnit.SECONDS);
         slaveSocket.start();
     }
 

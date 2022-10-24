@@ -7,6 +7,7 @@ import me.moose.gaia.common.GaiaServer;
 import me.moose.gaia.common.packet.GaiaPacket;
 import me.moose.gaia.common.packet.PacketRegistry;
 import me.moose.gaia.common.packet.handler.IGaiaPacketHandler;
+import me.moose.gaia.common.packet.packets.slave.server.GaiaSlaveHeartbeatPacket;
 import me.moose.gaia.common.utils.Logger;
 import redis.clients.jedis.JedisPubSub;
 
@@ -21,9 +22,9 @@ public class GaiaPubSub extends JedisPubSub {
     private String channel;
 
     @Override
-    public void onMessage(String channel,String message) {
+    public void onMessage(String channel, String message) {
 
-        if(!channel.equals(this.channel)) {
+        if (!channel.equals(this.channel)) {
             return;
         }
         JsonObject object = GSON.fromJson(message, JsonObject.class);
@@ -31,22 +32,28 @@ public class GaiaPubSub extends JedisPubSub {
         PacketRegistry registry = PacketRegistry.valueOf(object.get("type").getAsString());
         String sender = object.get("sender").getAsString();
         String target = object.get("target").getAsString();
-        if(sender.equals(redisHandler.getServerId())) {
+        if (sender.equals(redisHandler.getServerId())) {
             return;
         }
-        if(!isTarget(target)) {
+        if (!isTarget(target)) {
             return;
         }
-        GaiaServer.getLogger().debug("RedisHandler", "Got Message: " + message + " on channel: " + channel);
+        if (id != 3) { //Fuck off Heartbeat
+            GaiaServer.getLogger().debug("RedisHandler", "Got Message: " + message + " on channel: " + channel);
+        }
         JsonObject data = object.get("data").getAsJsonObject();
         GaiaPacket<IGaiaPacketHandler> gaiaPacket = null;
         try {
             gaiaPacket = registry.createPacket(id);
             gaiaPacket.setSendingID(sender);
             gaiaPacket.read(data);
-            GaiaServer.getInstance().getLogger().debug("RedisHandler", "Handling Packet: " + gaiaPacket.getClass().getSimpleName());
+            if (!(gaiaPacket.getClass() == GaiaSlaveHeartbeatPacket.class)) {
+                GaiaServer.getInstance().getLogger().debug("RedisHandler", "Handling Packet: " + gaiaPacket.getClass().getSimpleName());
+            }
             gaiaPacket.handle(redisHandler.getPacketHandler());
-            GaiaServer.getInstance().getLogger().debug("RedisHandler", "Handled Packet: " + gaiaPacket.getClass().getSimpleName(), Logger.DebugType.SUCCESS);
+            if (!(gaiaPacket.getClass() == GaiaSlaveHeartbeatPacket.class)) {
+                GaiaServer.getInstance().getLogger().debug("RedisHandler", "Handled Packet: " + gaiaPacket.getClass().getSimpleName(), Logger.DebugType.SUCCESS);
+            }
         } catch (Exception e) {
             //TODO LOGGER
             GaiaServer.getLogger().error("RedisHandler", "Error While Handling Packet With ID: " + id + " (From: " + sender + ")");
@@ -54,8 +61,9 @@ public class GaiaPubSub extends JedisPubSub {
         }
 
     }
+
     public boolean isTarget(String target) {
-        if(redisHandler.getServerId().equals("master")) {
+        if (redisHandler.getServerId().equals("master")) {
             return target.equals("master");
         }
         return target.equals("slaves") || target.equals(redisHandler.getServerId());

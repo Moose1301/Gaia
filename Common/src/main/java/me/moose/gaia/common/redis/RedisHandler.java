@@ -71,7 +71,8 @@ public class RedisHandler {
      */
     public void sendPacket(GaiaPacket<?> packet, String target) {
         JsonObject packetJson = new JsonObject();
-        packetJson.addProperty("id", packet.getRegistry().getPacketId((Class<? extends GaiaPacket<?>>) packet.getClass()));
+        int packetId = packet.getRegistry().getPacketId((Class<? extends GaiaPacket<?>>) packet.getClass());
+        packetJson.addProperty("id", packetId);
         packetJson.addProperty("type", packet.getRegistry().name());
         if(target != null) {
             packetJson.addProperty("target", target);
@@ -83,7 +84,9 @@ public class RedisHandler {
         packet.write(data);
         packetJson.add("data", data);
         try (Jedis jedis = this.pool.getResource()) {
-            GaiaServer.getLogger().debug("RedisHandler", "Publishing: " + packetJson.toString() + " to channel: " + CHANNEL);
+            if(packetId != 3) { //Fuck Off HeartBreak
+                GaiaServer.getLogger().debug("RedisHandler", "Publishing: " + packetJson.toString() + " to channel: " + CHANNEL);
+            }
             jedis.publish(CHANNEL, packetJson.toString());
         }
 

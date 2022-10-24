@@ -13,6 +13,7 @@ import me.moose.gaia.common.packet.packets.master.user.GaiaMasterUserKickPacket;
 import me.moose.gaia.common.packet.packets.master.user.GaiaMasterUserMessagePacket;
 import me.moose.gaia.common.packet.packets.slave.friend.GaiaSlaveUserFriendStatusChangePacket;
 import me.moose.gaia.common.packet.packets.slave.friend.GaiaSlaveUserRequestStateUpdatePacket;
+import me.moose.gaia.common.packet.packets.slave.server.GaiaSlaveHeartbeatPacket;
 import me.moose.gaia.common.packet.packets.slave.server.GaiaSlaveStatusPacket;
 import me.moose.gaia.common.packet.packets.slave.user.*;
 import me.moose.gaia.common.utils.Logger;
@@ -55,12 +56,14 @@ public enum PacketRegistry {
             registerPacket(GaiaSlaveStatusPacket.Startup.class);
             registerPacket(GaiaSlaveStatusPacket.Started.class);
             registerPacket(GaiaSlaveStatusPacket.Shutdown.class);
+            registerPacket(GaiaSlaveHeartbeatPacket.class);
             registerPacket(GaiaSlaveUserJoinPacket.class);
             registerPacket(GaiaSlaveUserLeavePacket.class);
             registerPacket(GaiaSlaveRequestUserDataPacket.class);
             registerPacket(GaiaSlaveUserCrashReportPacket.class);
             registerPacket(GaiaSlaveUserFriendStatusChangePacket.class);
             registerPacket(GaiaSlaveUserConsoleMessagePacket.class);
+
 
 
 

@@ -8,6 +8,7 @@ import me.moose.gaia.slave.GaiaSlave;
 import me.moose.gaia.slave.socket.nethandler.ByteBufWrapper;
 import me.moose.gaia.slave.socket.nethandler.NetHandler;
 import me.moose.gaia.slave.socket.nethandler.packets.server.WSPacketJoinServer;
+import me.moose.gaia.slave.tasks.UnauthorizedCleanerTask;
 import me.moose.gaia.slave.utils.KickConstants;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
@@ -16,6 +17,7 @@ import org.java_websocket.server.WebSocketServer;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Moose1301
@@ -34,6 +36,7 @@ public class SlaveSocket extends WebSocketServer {
     }
     @Override
     public void onStart() {
+        GaiaSlave.getInstance().getExecutor().scheduleAtFixedRate(new UnauthorizedCleanerTask(), 500, 500, TimeUnit.MILLISECONDS);
         GaiaSlave.getInstance().getLogger().sucess("SlaveSocket", "Started on Port: " + GaiaSlave.getInstance().getGaiaConfig().getSocketPort());
         handler = new NetHandler();
 
