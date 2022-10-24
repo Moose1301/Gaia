@@ -7,9 +7,15 @@ import me.moose.gaia.common.IGaiaServer;
 import me.moose.gaia.common.packet.packets.slave.server.GaiaSlaveStatusPacket;
 import me.moose.gaia.common.redis.RedisHandler;
 import me.moose.gaia.common.utils.Logger;
+import me.moose.gaia.common.utils.SecurityHandler;
 import me.moose.gaia.slave.cosmetic.CosmeticHandler;
 import me.moose.gaia.slave.packet.GaiaSlavePacketHandler;
 import me.moose.gaia.slave.profile.ProfileHandler;
+import me.moose.gaia.slave.socket.SlaveSocket;
+
+import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
 /**
  * @author Moose1301
@@ -27,6 +33,11 @@ public class GaiaSlave implements IGaiaServer {
     private CosmeticHandler cosmeticHandler;
     private ProfileHandler profileHandler;
     private GaiaConfig gaiaConfig;
+    private SlaveSocket slaveSocket;
+
+    private PublicKey publicKey;
+    private PrivateKey privateKey;
+
     public GaiaSlave() {
         logger = new Logger("Gaia", true);
         GaiaServer.setInstance(this);
@@ -39,6 +50,14 @@ public class GaiaSlave implements IGaiaServer {
             logger.error("Config", "Failed to load Gaia Config");
             return;
         }
+        KeyPair pair = SecurityHandler.generateKeyPair();
+        if (pair != null) {
+            publicKey = pair.getPublic();
+            privateKey = pair.getPrivate();
+        } else  {
+            getLogger().error("GaiaSlave", "Could not get Key Pair Shutting Down.");
+            System.exit(20);
+        }
         cosmeticHandler = new CosmeticHandler();
         profileHandler = new ProfileHandler();
         packetHandler = new GaiaSlavePacketHandler();
@@ -50,22 +69,18 @@ public class GaiaSlave implements IGaiaServer {
         );
         redisHandler.sendPacket(new GaiaSlaveStatusPacket.Startup(gaiaConfig.getId(), gaiaConfig.getRegion()));
 
-        //Stay Open
-        new Thread(new Runnable() {
-            @Override
-            public synchronized void run() {
-                for(;;)
-                    try {
-                        wait();
-                    } catch (InterruptedException e) {
-                    }
-            }
-        }).run();
+        slaveSocket = new SlaveSocket();
+        slaveSocket.start();
     }
 
 
     @Override
     public void shutdown() {
+        try {
+            slaveSocket.stop();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         redisHandler.sendPacket(new GaiaSlaveStatusPacket.Shutdown());
     }
 }

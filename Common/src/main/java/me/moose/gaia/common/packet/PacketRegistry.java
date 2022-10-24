@@ -4,6 +4,7 @@ import me.moose.gaia.common.GaiaServer;
 import me.moose.gaia.common.packet.handler.IGaiaPacketHandler;
 import me.moose.gaia.common.packet.packets.master.cosmetics.GaiaMasterCosmeticListUpdate;
 import me.moose.gaia.common.packet.packets.master.friend.GaiaMasterUserFriendUpdatePacket;
+import me.moose.gaia.common.packet.packets.master.server.GaiaMasterSlaveRestartPacket;
 import me.moose.gaia.common.packet.packets.master.server.GaiaMasterSlaveServerInfoPacket;
 import me.moose.gaia.common.packet.packets.master.server.GaiaMasterStatusPacket;
 import me.moose.gaia.common.packet.packets.master.user.GaiaMasterUserDataPacket;
@@ -13,10 +14,7 @@ import me.moose.gaia.common.packet.packets.master.user.GaiaMasterUserMessagePack
 import me.moose.gaia.common.packet.packets.slave.friend.GaiaSlaveUserFriendStatusChangePacket;
 import me.moose.gaia.common.packet.packets.slave.friend.GaiaSlaveUserRequestStateUpdatePacket;
 import me.moose.gaia.common.packet.packets.slave.server.GaiaSlaveStatusPacket;
-import me.moose.gaia.common.packet.packets.slave.user.GaiaSlaveRequestUserDataPacket;
-import me.moose.gaia.common.packet.packets.slave.user.GaiaSlaveUserCrashReportPacket;
-import me.moose.gaia.common.packet.packets.slave.user.GaiaSlaveUserJoinPacket;
-import me.moose.gaia.common.packet.packets.slave.user.GaiaSlaveUserLeavePacket;
+import me.moose.gaia.common.packet.packets.slave.user.*;
 import me.moose.gaia.common.utils.Logger;
 
 import java.util.HashMap;
@@ -32,6 +30,7 @@ public enum PacketRegistry {
             registerPacket(GaiaMasterStatusPacket.Startup.class);
             registerPacket(GaiaMasterStatusPacket.Shutdown.class);
             registerPacket(GaiaMasterCosmeticListUpdate.class);
+            registerPacket(GaiaMasterSlaveRestartPacket.class);
 
             //User Data Shit
             registerPacket(GaiaMasterUserDataPacket.Loaded.class);
@@ -61,6 +60,7 @@ public enum PacketRegistry {
             registerPacket(GaiaSlaveRequestUserDataPacket.class);
             registerPacket(GaiaSlaveUserCrashReportPacket.class);
             registerPacket(GaiaSlaveUserFriendStatusChangePacket.class);
+            registerPacket(GaiaSlaveUserConsoleMessagePacket.class);
 
 
 

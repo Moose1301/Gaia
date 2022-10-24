@@ -2,6 +2,7 @@ package me.moose.gaia.common.packet.handler;
 
 import me.moose.gaia.common.packet.packets.master.cosmetics.GaiaMasterCosmeticListUpdate;
 import me.moose.gaia.common.packet.packets.master.friend.GaiaMasterUserFriendUpdatePacket;
+import me.moose.gaia.common.packet.packets.master.server.GaiaMasterSlaveRestartPacket;
 import me.moose.gaia.common.packet.packets.master.server.GaiaMasterSlaveServerInfoPacket;
 import me.moose.gaia.common.packet.packets.master.server.GaiaMasterStatusPacket;
 import me.moose.gaia.common.packet.packets.master.user.GaiaMasterUserDataPacket;
@@ -31,6 +32,8 @@ public interface IGaiaSlavePacketHandler extends IGaiaPacketHandler {
     void handle(GaiaMasterUserMessagePacket.Notification packet);
 
     void handle(GaiaMasterUserFriendUpdatePacket packet);
+    void handle(GaiaMasterSlaveRestartPacket packet);
+
 
 
 

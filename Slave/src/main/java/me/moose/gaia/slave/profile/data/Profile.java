@@ -7,6 +7,10 @@ import me.moose.gaia.common.profile.friend.CommonFriend;
 import me.moose.gaia.common.profile.friend.CommonFriendRequest;
 import me.moose.gaia.common.profile.friend.status.FriendStatus;
 import me.moose.gaia.common.profile.rank.Rank;
+import me.moose.gaia.slave.GaiaSlave;
+import me.moose.gaia.slave.socket.SlaveSocket;
+import me.moose.gaia.slave.socket.nethandler.WSPacket;
+import org.java_websocket.WebSocket;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,6 +23,8 @@ import java.util.function.Predicate;
  */
 @Getter @Setter
 public class Profile {
+
+    private long startLoaded;
     private boolean completelyLoaded;
     private final UUID uuid;
     private final String username;
@@ -35,14 +41,25 @@ public class Profile {
 
     private List<CommonProfileCosmetic> cosmetics;
 
+    private WebSocket conn;
+
 
     public Profile(UUID uuid, String username) {
         this.uuid = uuid;
         this.username = username;
+        this.startLoaded = System.currentTimeMillis();
         this.completelyLoaded = false;
     }
 
     public Optional<CommonFriend> getFriend(UUID uuid) {
         return friends.stream().filter(commonFriend -> commonFriend.getUuid().equals(uuid)).findFirst();
+    }
+    public boolean isOnline() {
+        return conn != null && conn.isOpen();
+    }
+    public void sendPacket(WSPacket packet) {
+        if(isOnline()) {
+            SlaveSocket.getInstance().getHandler().sendPacket(conn, packet);
+        }
     }
 }

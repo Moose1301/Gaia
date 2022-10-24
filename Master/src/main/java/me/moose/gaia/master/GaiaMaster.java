@@ -7,9 +7,11 @@ import com.mongodb.client.model.UpdateOptions;
 import lombok.Getter;
 import me.moose.gaia.common.GaiaServer;
 import me.moose.gaia.common.IGaiaServer;
+import me.moose.gaia.common.packet.packets.master.server.GaiaMasterSlaveRestartPacket;
 import me.moose.gaia.common.packet.packets.master.server.GaiaMasterStatusPacket;
 import me.moose.gaia.common.redis.RedisHandler;
 import me.moose.gaia.common.utils.Logger;
+import me.moose.gaia.master.command.CommandHandler;
 import me.moose.gaia.master.cosmetic.CosmeticHandler;
 import me.moose.gaia.master.packet.GaiaMasterPacketHandler;
 import me.moose.gaia.master.profile.ProfileHandler;
@@ -33,7 +35,9 @@ public class GaiaMaster implements IGaiaServer {
     private ServerHandler serverHandler;
     private ProfileHandler profileHandler;
     private CosmeticHandler cosmeticHandler;
+    private CommandHandler commandHandler;
     private GaiaConfig config;
+
 
     private MongoClient client;
 
@@ -58,6 +62,7 @@ public class GaiaMaster implements IGaiaServer {
         connectToMongo();
         serverHandler = new ServerHandler();
         cosmeticHandler = new CosmeticHandler();
+        commandHandler = new CommandHandler();
         packetHandler = new GaiaMasterPacketHandler();
 
         profileHandler = new ProfileHandler();
@@ -68,6 +73,7 @@ public class GaiaMaster implements IGaiaServer {
                 packetHandler
         );
         redisHandler.sendPacket(new GaiaMasterStatusPacket.Startup(), "slaves");
+
 
         //Stay Open
         new Thread(new Runnable() {

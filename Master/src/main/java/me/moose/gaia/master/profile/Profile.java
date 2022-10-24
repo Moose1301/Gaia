@@ -2,6 +2,8 @@ package me.moose.gaia.master.profile;
 
 import lombok.Getter;
 import lombok.Setter;
+import me.moose.gaia.common.GaiaServer;
+import me.moose.gaia.common.packet.packets.master.user.GaiaMasterUserMessagePacket;
 import me.moose.gaia.common.profile.cosmetic.CommonProfileCosmetic;
 import me.moose.gaia.common.profile.friend.CommonFriend;
 import me.moose.gaia.common.profile.friend.CommonFriendRequest;
@@ -104,6 +106,34 @@ public class Profile {
                 });
             }
 
+        }
+    }
+
+
+    /**
+     * Send an array of console outputs to the player
+     *
+     * @param strings the strings to output to the players console
+     */
+    public void sendMessage(String... strings) {
+        for (String string : strings) {
+            sendMessage(string);
+        }
+    }
+
+    /**
+     * Send a message to the player in their console
+     *
+     * @param string the string to output to the players console
+     */
+    public void sendMessage(String string) {
+        if(currentSlave == null) {
+            return;
+        }
+        String[] split = string.split("\n");
+
+        for (String str : split) {
+            GaiaServer.getRedisHandler().sendPacket(new GaiaMasterUserMessagePacket.ConsoleMessage(uniqueId, str), currentSlave);
         }
     }
 }

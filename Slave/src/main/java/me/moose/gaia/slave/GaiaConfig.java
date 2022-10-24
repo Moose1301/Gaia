@@ -23,6 +23,8 @@ public class GaiaConfig {
     private String redisHost = "127.0.0.1";
     private int redisPort = 6379;
 
+    private int socketPort = 8080;
+
     public void load() throws IOException {
         File file = new File(FILE_NAME);
         if(!file.exists()) {
@@ -31,6 +33,7 @@ public class GaiaConfig {
             object.addProperty("region", region);
             object.addProperty("redisHost", redisHost);
             object.addProperty("redisPort", redisPort);
+            object.addProperty("socketPort", 80);
             FileWriter writer = new FileWriter(file);
             writer.write(GaiaServer.GSON_PRETTY.toJson(object));
             writer.close();
@@ -42,6 +45,10 @@ public class GaiaConfig {
         region = object.get("region").getAsString();
         redisHost = object.get("redisHost").getAsString();
         redisPort = object.get("redisPort").getAsInt();
+        if(object.has("socketPort")) {
+            socketPort = object.get("socketPort").getAsInt();
+        }
+
     }
 
 }

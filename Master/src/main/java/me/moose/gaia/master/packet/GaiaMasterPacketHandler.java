@@ -10,21 +10,20 @@ import me.moose.gaia.common.packet.packets.master.user.GaiaMasterUserDataPacket;
 import me.moose.gaia.common.packet.packets.master.user.GaiaMasterUserKickPacket;
 import me.moose.gaia.common.packet.packets.slave.friend.GaiaSlaveUserFriendStatusChangePacket;
 import me.moose.gaia.common.packet.packets.slave.friend.GaiaSlaveUserRequestStateUpdatePacket;
-import me.moose.gaia.common.packet.packets.slave.user.GaiaSlaveRequestUserDataPacket;
+import me.moose.gaia.common.packet.packets.slave.user.*;
 import me.moose.gaia.common.packet.packets.slave.server.GaiaSlaveStatusPacket;
-import me.moose.gaia.common.packet.packets.slave.user.GaiaSlaveUserCrashReportPacket;
-import me.moose.gaia.common.packet.packets.slave.user.GaiaSlaveUserJoinPacket;
-import me.moose.gaia.common.packet.packets.slave.user.GaiaSlaveUserLeavePacket;
 import me.moose.gaia.common.profile.friend.CommonFriend;
+import me.moose.gaia.common.profile.rank.Rank;
 import me.moose.gaia.common.utils.Logger;
 import me.moose.gaia.master.GaiaMaster;
+import me.moose.gaia.master.command.Command;
 import me.moose.gaia.master.profile.friend.Friend;
 import me.moose.gaia.master.utils.KickConstants;
 import me.moose.gaia.master.profile.Profile;
 import me.moose.gaia.master.profile.crash.CrashReport;
 import me.moose.gaia.master.server.Server;
 
-import java.util.function.Consumer;
+import java.util.Arrays;
 
 /**
  * @author Moose1301
@@ -197,5 +196,45 @@ public class GaiaMasterPacketHandler implements IGaiaMasterPacketHandler {
         }
 
         GaiaServer.getLogger().debug("PacketHandler", "Updated " + profile.getUsername() + " Friends with their new status", Logger.DebugType.SUCCESS);
+    }
+
+    @Override
+    public void handle(GaiaSlaveUserConsoleMessagePacket packet) {
+        Profile profile = GaiaMaster.getInstance().getProfileHandler().fromUuid(packet.getUuid(), false);
+
+        String[] args = packet.getMessage().split(" ");
+        Command command = GaiaMaster.getInstance().getCommandHandler().getCommand(args[0].toLowerCase());
+
+        if (command != null) {
+            if (command.getRequiredRank() == null || Rank.isValid(command.getRequiredRank(), profile.getRank())) {
+
+                // Require login whenever the command requires MOD+
+                if (command.getRequiredRank() != null && Rank.isValid(Rank.DEVELOPER, command.getRequiredRank())) {
+                    /*
+                    if (!LoginCommand.LOGGED_IN_USERS.contains(profile.getUniqueId())) {
+                        profile.sendMessage("&cYou must be logged in to run this command because it requires "
+                                + Rank.DEVELOPER.getFormatColor() + "MOD&c+.");
+                        return;
+                    }
+
+                     */
+                }
+
+                try {
+                    if (command.isAsync()) {
+                        GaiaMaster.getInstance().getExecutor().execute(() -> command.executeCommand(profile, Arrays.copyOfRange(args, 1, args.length)));
+                    } else {
+                        command.executeCommand(profile, Arrays.copyOfRange(args, 1, args.length));
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            } else {
+                profile.sendMessage("&cYou don't have the required rank to run the &f" + command.getAliases()[0]
+                        + " &ccommand. (Required Rank: " + command.getRequiredRank().name() + "&c)");
+            }
+        } else {
+            profile.sendMessage("&c" + args[0] + " isn't a valid command.");
+        }
     }
 }

@@ -27,11 +27,43 @@ public class ProfileHandler {
     public ProfileHandler() {
         collection = GaiaMaster.getInstance().getDatabase().getCollection("profiles");
 
-        //TODO LOAD PROFILES!!
     }
+
     public Profile getProfile(UUID uuid) {
         return profiles.get(uuid);
     }
+    /**
+     * Searches for a profile with a uuid
+     *
+     * @param uuid the uuid to search for
+     * @param loadFromCache if its not found in memory should we load it
+     * @return the profile found.
+     */
+    public Profile fromUuid(UUID uuid, boolean loadFromCache) {
+        Profile profile = profiles.get(uuid);
+
+        if (profile != null) {
+            return profile;
+        }
+
+        if (loadFromCache) {
+            /*
+            String username = UUIDUtils.name(uuid);
+
+            if (username != null) {
+                profile = new Profile(uuid, username);
+
+                uuidCache.put(uuid, profile);
+                nameCache.put(username.toLowerCase(), profile);
+
+                return profile;
+            }
+             */
+        }
+        return null;
+    }
+
+
     public Profile getProfileOrLoad(UUID uuid, String username) {
         if(profiles.containsKey(uuid)) {
             return profiles.get(uuid);
