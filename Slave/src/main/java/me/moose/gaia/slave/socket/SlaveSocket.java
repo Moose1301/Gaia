@@ -82,8 +82,10 @@ public class SlaveSocket extends WebSocketServer {
 
     @Override
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
-        users.remove(conn.getAttachment());
-
+        SocketUser user =users.remove(conn.getAttachment());
+        if(user != null && user.isRepliedAuthRequest()) {
+            GaiaMaster.getRedisHandler().sendPacket(new GaiaSlaveUserLeavePacket(user.getUuid()));
+        }
     }
 
 
