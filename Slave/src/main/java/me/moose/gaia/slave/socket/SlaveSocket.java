@@ -86,6 +86,7 @@ public class SlaveSocket extends WebSocketServer {
         if(user != null && user.isRepliedAuthRequest()) {
             GaiaMaster.getRedisHandler().sendPacket(new GaiaSlaveUserLeavePacket(user.getUuid()));
         }
+        unauthorizedUsers.remove(conn.getAttachment());
     }
 
 
